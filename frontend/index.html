@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оплата заказа - Демо магазин</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .order-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .order-info p {
+            margin: 5px 0;
+            color: #495057;
+        }
+
+        .amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .payment-methods {
+            padding: 30px;
+        }
+
+        .method-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .method-btn {
+            flex: 1;
+            padding: 15px 10px;
+            border: 2px solid #e9ecef;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .method-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .method-btn.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .method-btn img {
+            width: 30px;
+            height: 30px;
+            display: block;
+            margin: 0 auto 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .card-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .card-row .form-group {
+            flex: 1;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .payment-form {
+            display: none;
+        }
+
+        .payment-form.active {
+            display: block;
+        }
+
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .result-modal.show {
+            display: flex;
+        }
+
+        .result-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .result-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .result-icon.success {
+            color: #28a745;
+        }
+
+        .result-icon.error {
+            color: #dc3545;
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .result-message {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .result-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .loader {
+            display: none;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .helper-text {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💳 Оплата заказа</h1>
+            <p>Безопасная оплата через платежный шлюз</p>
+        </div>
+
+        <div class="order-info">
+            <p><strong>Заказ №:</strong> <span id="orderNumber">ORD-12345</span></p>
+            <p><strong>Товар:</strong> Премиум подписка на месяц</p>
+        </div>
+
+        <div class="amount">
+            1 500.00 ₽
+        </div>
+
+        <div class="payment-methods">
+            <div class="method-selector">
+                <button class="method-btn active" data-method="sbp">
+                    📱<br>СБП
+                </button>
+                <button class="method-btn" data-method="card">
+                    💳<br>Карта
+                </button>
+                <button class="method-btn" data-method="wallet">
+                    👛<br>Кошелёк
+                </button>
+            </div>
+
+            <!-- Форма СБП -->
+            <form id="sbpForm" class="payment-form active">
+                <div class="form-group">
+                    <label for="sbpPhone">Номер телефона</label>
+                    <input type="tel" id="sbpPhone" placeholder="+7 (999) 123-45-67" required>
+                    <p class="helper-text">Номер телефона, привязанный к СБП</p>
+                </div>
+                <div class="form-group">
+                    <label for="sbpEmail">Email (необязательно)</label>
+                    <input type="email" id="sbpEmail" placeholder="customer@example.com">
+                </div>
+                <button type="submit" class="submit-btn">Оплатить через СБП</button>
+            </form>
+
+            <!-- Форма карты -->
+            <form id="cardForm" class="payment-form">
+                <div class="form-group">
+                    <label for="cardNumber">Номер карты</label>
+                    <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" required>
+                </div>
+                <div class="card-row">
+                    <div class="form-group">
+                        <label for="cardExpiry">Срок действия</label>
+                        <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cardCvv">CVV</label>
+                        <input type="password" id="cardCvv" placeholder="123" maxlength="4" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cardHolder">Владелец карты</label>
+                    <input type="text" id="cardHolder" placeholder="IVAN IVANOV" required>
+                </div>
+                <div class="form-group">
+                    <label for="cardEmail">Email для чека</label>
+                    <input type="email" id="cardEmail" placeholder="customer@example.com" required>
+                </div>
+                <button type="submit" class="submit-btn">Оплатить картой</button>
+            </form>
+
+            <!-- Форма цифрового кошелька -->
+            <form id="walletForm" class="payment-form">
+                <div class="form-group">
+                    <label for="walletId">ID цифрового кошелька</label>
+                    <input type="text" id="walletId" placeholder="wallet_123456789" required>
+                    <p class="helper-text">Уникальный идентификатор вашего цифрового кошелька</p>
+                </div>
+                <div class="form-group">
+                    <label for="walletEmail">Email</label>
+                    <input type="email" id="walletEmail" placeholder="customer@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="walletPhone">Телефон</label>
+                    <input type="tel" id="walletPhone" placeholder="+7 (999) 123-45-67" required>
+                </div>
+                <button type="submit" class="submit-btn">Оплатить кошельком</button>
+            </form>
+
+            <div class="loader" id="loader"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно результата -->
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <div class="result-icon" id="resultIcon">✓</div>
+            <h2 class="result-title" id="resultTitle">Оплата успешна!</h2>
+            <p class="result-message" id="resultMessage">Ваш платеж был успешно обработан.</p>
+            <button class="result-btn" onclick="closeModal()">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        // Конфигурация API
+        const API_BASE_URL = 'http://localhost:8080'; // URL твоего API-шлюза
+        const MERCHANT_ID = 'merchant_demo_001';
+
+        // Генерация UUID для idempotency_key
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Переключение методов оплаты
+        const methodBtns = document.querySelectorAll('.method-btn');
+        const forms = document.querySelectorAll('.payment-form');
+
+        methodBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const method = btn.dataset.method;
+                
+                // Убираем активный класс у всех кнопок и форм
+                methodBtns.forEach(b => b.classList.remove('active'));
+                forms.forEach(f => f.classList.remove('active'));
+                
+                // Добавляем активный класс выбранной кнопке и форме
+                btn.classList.add('active');
+                document.getElementById(`${method}Form`).classList.add('active');
+            });
+        });
+
+        // Форматирование номера карты
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(.{4})/g, '$1 ').trim();
+            e.target.value = value;
+        });
+
+        // Форматирование срока действия карты
+        document.getElementById('cardExpiry').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // Форматирование телефона
+        document.getElementById('sbpPhone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.startsWith('8')) value = '7' + value.substring(1);
+            if (!value.startsWith('7')) value = '7' + value;
+            value = '+' + value;
+            if (value.length > 12) value = value.substring(0, 12);
+            e.target.value = value;
+        });
+
+        // Обработка отправки формы СБП
+        document.getElementById('sbpForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await processPayment('SBP', {
+                phone: document.getElementById('sbpPhone').value,
+                email: document.getElementById('sbpEmail').value
+            });
+        });
+
+        // Обработка отправки формы карты
+        document.getElementById('cardForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            const expiryDate = document.getElementById('cardExpiry').value;
+            
+            await processPayment('CARD', {
+                card_number: cardNumber,
+                card_date: expiryDate,
+                cvv_code: document.getElementById('cardCvv').value,
+                card_holder: document.getElementById('cardHolder').value,
+                email: document.getElementById('cardEmail').value
+            });
+        });
+
+        // Обработка отправки формы кошелька
+        document.getElementById('walletForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await processPayment('DIGITAL_WALLET', {
+                digital_wallet_id: document.getElementById('walletId').value,
+                email: document.getElementById('walletEmail').value,
+                phone: document.getElementById('walletPhone').value
+            });
+        });
+
+        // Основная функция обработки платежа
+        async function processPayment(paymentMethod, customerData) {
+            const loader = document.getElementById('loader');
+            const submitBtns = document.querySelectorAll('.submit-btn');
+            
+            // Блокируем кнопки и показываем лоадер
+            submitBtns.forEach(btn => btn.disabled = true);
+            loader.style.display = 'block';
+
+            const orderNumber = document.getElementById('orderNumber').textContent;
+            const idempotencyKey = generateUUID();
+
+            // Формируем запрос согласно модели PaymentRequest
+            const requestBody = {
+                merchant_id: MERCHANT_ID,
+                idempotency_key: idempotencyKey,
+                payment_info: {
+                    amount: {
+                        value: 150000, // В копейках (1500.00 RUB = 150000 копеек)
+                        currency: 'RUB'
+                    },
+                    payment_method_type: paymentMethod,
+                    customer_data: customerData,
+                    description: `Оплата заказа ${orderNumber}`,
+                    metadata: {
+                        order_id: orderNumber,
+                        product: 'premium_subscription'
+                    }
+                }
+            };
+
+            console.log('Отправка платежа:', requestBody);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/payments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Merchant-ID': MERCHANT_ID,
+                        'X-Idempotency-Key': idempotencyKey
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult(true, 'Оплата успешна!', 
+                        `Транзакция #${result.id || 'N/A'} успешно обработана.<br>` +
+                        `Статус: ${result.current_status || 'SUCCESS'}<br>` +
+                        `Платежная система: ${result.transaction_details?.payment_system || 'N/A'}`);
+                } else {
+                    showResult(false, 'Ошибка оплаты', 
+                        result.error?.message || 'Произошла ошибка при обработке платежа.<br>Код ошибки: ' + (result.error?.code || 'UNKNOWN'));
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showResult(false, 'Ошибка соединения', 
+                    'Не удалось подключиться к платежному шлюзу.<br>Убедитесь, что сервер запущен на порту 8080.');
+            } finally {
+                // Разблокируем кнопки и скрываем лоадер
+                submitBtns.forEach(btn => btn.disabled = false);
+                loader.style.display = 'none';
+            }
+        }
+
+        // Показ результата
+        function showResult(isSuccess, title, message) {
+            const modal = document.getElementById('resultModal');
+            const icon = document.getElementById('resultIcon');
+            const titleEl = document.getElementById('resultTitle');
+            const messageEl = document.getElementById('resultMessage');
+
+            icon.textContent = isSuccess ? '✓' : '✗';
+            icon.className = 'result-icon ' + (isSuccess ? 'success' : 'error');
+            titleEl.textContent = title;
+            messageEl.innerHTML = message;
+
+            modal.classList.add('show');
+        }
+
+        // Закрытие модального окна
+        function closeModal() {
+            document.getElementById('resultModal').classList.remove('show');
+            
+            // Очищаем формы
+            document.querySelectorAll('form').forEach(form => form.reset());
+        }
+
+        // Инициализация номера заказа
+        document.getElementById('orderNumber').textContent = 'ORD-' + Math.floor(Math.random() * 90000 + 10000);
+    </script>
+</body>
+</html>
